@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE logback>
+
+<configuration scan="true" scanPeriod="60 seconds">
+
+	<!-- Appenders -->
+	<appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSS} LEVEL=%-5p TXN_ID=%X{TXNID} SESSION_ID=%X{SID} THREAD_ID=%t CLASS="%class{0}" METHOD="%method{0}" %m%n</pattern>
+		</layout>
+	</appender>
+	
+	<appender name="rollingLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${catalina.logs}/${appName}_${port.http.nonssl}.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<fileNamePattern>${catalina.logs}/${appName}.${port.http.nonssl}.%i.log.gz</fileNamePattern>
+			<minIndex>1</minIndex>
+			<maxIndex>5</maxIndex>
+		</rollingPolicy>
+		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<maxFileSize>100MB</maxFileSize>
+		</triggeringPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSS} LEVEL=%-5p THREAD_ID=%t SESSION_ID=%X{SID} TXN_ID=%X{TXNID} CLASS="%class{0}" %m%n</pattern>
+		</encoder>
+	</appender>
+	
+	<appender name="rollingLogAsync" class="ch.qos.logback.classic.AsyncAppender">
+		<queueSize>500</queueSize>
+		<discardingThreshold>0</discardingThreshold>
+		<includeCallerData>true</includeCallerData>
+    	<appender-ref ref="rollingLog" />
+    </appender>
+  	
+	<!-- 3rdparty Loggers -->
+	<logger name="org.springframework" level="INFO"/>
+
+	<!-- Application Loggers -->
+	<logger name="com.datastax.driver.core.QueryLogger" level="TRACE"/>
+
+	<root level="INFO">
+        <appender-ref ref="consoleAppender" />
+	</root>
+
+</configuration>
